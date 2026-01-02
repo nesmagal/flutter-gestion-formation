@@ -1,10 +1,45 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RegisterScreen extends StatelessWidget {
+  final TextEditingController _fullNameController = TextEditingController(); 
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController(); 
 
-final TextEditingController _FullNameController = TextEditingController();
-final TextEditingController _emailController = TextEditingController();
-final TextEditingController _passwordController = TextEditingController();
+  // Méthode SignUp
+  Future<void> _signUp(BuildContext context, String email, String password, String fullName) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      
+
+      await userCredential.user?.updateDisplayName(fullName);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Inscription réussie ! Bienvenue $fullName"),
+          backgroundColor: Colors.green,
+        ),
+      );
+      
+      Navigator.pop(context); // Retour à la page de connexion
+    } on FirebaseAuthException catch (e) {
+      String message = "Erreur lors de l'inscription";
+      
+      if (e.code == 'weak-password') {
+        message = "Le mot de passe est trop faible.";
+      } else if (e.code == 'email-already-in-use') {
+        message = "Cet email est déjà utilisé.";
+      } else if (e.code == 'invalid-email') {
+        message = "Email invalide.";
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +103,16 @@ final TextEditingController _passwordController = TextEditingController();
                             ],
                           ),
                           child: ClipOval(
-                          child: Image.asset(
+                            child: Image.asset(
                               'assets/images/register.png',
                               fit: BoxFit.cover,
-                             ),
-                           ),
+                              errorBuilder: (context, error, stackTrace) => Icon(
+                                Icons.person_add,
+                                size: 60,
+                                color: Color(0xFF1565C0),
+                              ),
+                            ),
+                          ),
                         ),
                         SizedBox(height: 30),
                         
@@ -109,7 +149,7 @@ final TextEditingController _passwordController = TextEditingController();
                             ],
                           ),
                           child: TextField(
-                            controller: _FullNameController,
+                            controller: _fullNameController, 
                             decoration: InputDecoration(
                               labelText: "Nom complet",
                               prefixIcon: Icon(Icons.person, color: Color(0xFF1565C0)),
@@ -139,6 +179,7 @@ final TextEditingController _passwordController = TextEditingController();
                           ),
                           child: TextField(
                             controller: _emailController,
+                            keyboardType: TextInputType.emailAddress, 
                             decoration: InputDecoration(
                               labelText: "Email",
                               prefixIcon: Icon(Icons.email, color: Color(0xFF1565C0)),
@@ -181,19 +222,79 @@ final TextEditingController _passwordController = TextEditingController();
                             ),
                           ),
                         ),
+                        SizedBox(height: 20),
+
+                        // Confirm Password Field
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _confirmPasswordController, 
+                            obscureText: true,
+                            decoration: InputDecoration(
+                              labelText: "Confirmation de Mot de passe",
+                              prefixIcon: Icon(Icons.lock, color: Color(0xFF1565C0)),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                            ),
+                          ),
+                        ),
                         SizedBox(height: 30),
                         
-                        // Register Button
+                        // Register Button 
                         ElevatedButton(
                           onPressed: () {
-                            // Show success message and return to login
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Compte créé avec succès!"),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                            Navigator.pop(context);
+                            final fullName = _fullNameController.text.trim(); 
+                            final email = _emailController.text.trim();
+                            final password = _passwordController.text.trim();
+                            final confirmPassword = _confirmPasswordController.text.trim();
+
+                            // Validation complète
+                            if (fullName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Veuillez remplir tous les champs"),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              return;
+                            }
+
+                            if (password != confirmPassword) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Les mots de passe ne correspondent pas !"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            if (password.length < 6) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Le mot de passe doit contenir au moins 6 caractères"),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Appel de la méthode avec le nom complet
+                            _signUp(context, email, password, fullName);
                           },
                           child: Text(
                             "Créer mon compte",

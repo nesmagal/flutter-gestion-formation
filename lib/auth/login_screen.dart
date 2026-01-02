@@ -1,11 +1,51 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import '../screen/home_screen.dart';
 
 class LoginScreen extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController(); 
 
-final TextEditingController _emailController = TextEditingController();
-final TextEditingController _PasswordController = TextEditingController();
+  Future<void> _signIn(BuildContext context) async {
+    //Validation des champs
+    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Veuillez remplir tous les champs"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      
+      // Succès : Vers la Home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      // Gestion d'erreur
+      String message = "Une erreur est survenue";
+      if (e.code == 'user-not-found') {
+        message = "Aucun utilisateur trouvé.";
+      } else if (e.code == 'wrong-password') {
+        message = "Mot de passe incorrect.";
+      } else if (e.code == 'invalid-email') {
+        message = "Email invalide.";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,19 +83,20 @@ final TextEditingController _PasswordController = TextEditingController();
                         ),
                       ],
                     ),
-                    child: ClipOval( // UN SEUL CHILD ICI
+                    child: ClipOval(
                       child: Image.asset(
-                      'assets/images/login.png',
-                       fit: BoxFit.cover,
-                    // Ajout d'une sécurité si l'image ne charge pas
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                     Icons.person,
-                    size: 60,
-                    color: Color(0xFF1565C0),
+                        'assets/images/login.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Color(0xFF1565C0),
+                        ),
+                      ),
+                    ),
                   ),
-                  ),
-                ),
-                ),  
+                  SizedBox(height: 40),
+                  
                   // Title
                   Text(
                     "Connexion",
@@ -90,6 +131,7 @@ final TextEditingController _PasswordController = TextEditingController();
                     ),
                     child: TextField(
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress, 
                       decoration: InputDecoration(
                         labelText: "Email",
                         prefixIcon: Icon(Icons.email, color: Color(0xFF1565C0)),
@@ -118,7 +160,7 @@ final TextEditingController _PasswordController = TextEditingController();
                       ],
                     ),
                     child: TextField(
-                      controller: _PasswordController,
+                      controller: _passwordController, 
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: "Mot de passe",
@@ -134,14 +176,9 @@ final TextEditingController _PasswordController = TextEditingController();
                   ),
                   SizedBox(height: 30),
                   
-                  // Login Button
+                  // Login Button 
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                      );
-                    },
+                    onPressed: () => _signIn(context), 
                     child: Text(
                       "Se connecter",
                       style: TextStyle(
@@ -161,7 +198,7 @@ final TextEditingController _PasswordController = TextEditingController();
                   ),
                   SizedBox(height: 20),
                   
-                  // Register Link
+                  // Register Link -
                   TextButton(
                     onPressed: () {
                       Navigator.push(
