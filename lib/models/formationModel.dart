@@ -5,6 +5,7 @@ class FormationModel {
   final String description;
   final String nomFormateur;
   final String domaine;
+  final String categorie; // NOUVEAU: pour lier avec CategoryModel
   final double prix;
   final int capacite;
   final String imageUrl;
@@ -16,6 +17,7 @@ class FormationModel {
     required this.description,
     required this.nomFormateur,
     required this.domaine,
+    required this.categorie, // NOUVEAU
     required this.prix,
     required this.capacite,
     required this.imageUrl,

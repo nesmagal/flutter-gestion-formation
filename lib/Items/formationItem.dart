@@ -40,19 +40,7 @@ class FormationItem extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                  child: Image.network(
-                    formation.imageUrl,
-                    height: 100,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 100,
-                        color: Colors.grey[300],
-                        child: Icon(Icons.image, size: 50, color: Colors.grey),
-                      );
-                    },
-                  ),
+                  child: _buildImage(),
                 ),
                 if (formation.isComplete)
                   Positioned(
@@ -130,6 +118,60 @@ class FormationItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Méthode pour construire l'image
+  Widget _buildImage() {
+    // Vérifier si c'est une URL ou un chemin local
+    final isNetworkImage = formation.imageUrl.startsWith('http://') || 
+                           formation.imageUrl.startsWith('https://');
+
+    if (isNetworkImage) {
+      // Image depuis Internet
+      return Image.network(
+        formation.imageUrl,
+        height: 100,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildPlaceholder();
+        },
+      );
+    } else {
+      // Image locale (assets) - IMPORTANT: Utiliser Image.asset
+      return Image.asset(
+        formation.imageUrl,
+        height: 100,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print("Erreur de chargement de l'image: ${formation.imageUrl}");
+          return _buildPlaceholder();
+        },
+      );
+    }
+  }
+
+  // Placeholder en cas d'erreur
+  Widget _buildPlaceholder() {
+    return Container(
+      height: 100,
+      color: Colors.grey[300],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.broken_image, size: 40, color: Colors.grey[600]),
+          SizedBox(height: 5),
+          Text(
+            "Image introuvable",
+            style: TextStyle(
+              fontSize: 10,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
       ),
     );
   }
