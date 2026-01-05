@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gestion_formations_flutter/Items/categoryItem.dart';
 import 'package:gestion_formations_flutter/Items/formationItem.dart';
-import '../models/categoryModel.dart';
 import '../data/formationsData.dart';
+import '../data/categoriesData.dart';
 import 'categoryFormationsScreen.dart';
+import 'formationDetailsScreen.dart';
 
 class AccueilScreen extends StatelessWidget {
   @override
@@ -14,29 +15,8 @@ class AccueilScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     final userName = user?.displayName ?? "Utilisateur";
 
-    // Liste des catégories
-    final List<CategoryModel> categories = [
-      CategoryModel(
-        title: "Développement",
-        icon: Icons.code,
-        color: Color(0xFF2196F3), // Bleu
-      ),
-      CategoryModel(
-        title: "Design",
-        icon: Icons.brush,
-        color: Color(0xFF9C27B0), // Violet
-      ),
-      CategoryModel(
-        title: "Marketing",
-        icon: Icons.campaign,
-        color: Color(0xFFFF9800), // Orange
-      ),
-      CategoryModel(
-        title: "Business",
-        icon: Icons.business_center,
-        color: Color(0xFF4CAF50), // Vert
-      ),
-    ];
+    // Récupérer toutes les catégories
+    final categories = CategoriesData.getAllCategories();
 
     // Récupérer les formations populaires
     final formations = FormationsData.getPopularFormations(limit: 5);
@@ -148,7 +128,7 @@ class AccueilScreen extends StatelessWidget {
               ),
               SizedBox(height: 15),
 
-              // Grille de catégories
+              // Grille de catégories (scrollable si plus de 4)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.builder(
@@ -217,7 +197,7 @@ class AccueilScreen extends StatelessWidget {
               ),
               SizedBox(height: 15),
 
-              // Liste de formations populaires
+              // Liste de formations populaires avec navigation
               SizedBox(
                 height: 240,
                 child: ListView.builder(
@@ -228,7 +208,15 @@ class AccueilScreen extends StatelessWidget {
                     return FormationItem(
                       formation: formations[index],
                       onTap: () {
-                        print("Formation cliquée: ${formations[index].titre}");
+                        // Navigation vers les détails de la formation
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FormationDetailsScreen(
+                              formation: formations[index],
+                            ),
+                          ),
+                        );
                       },
                     );
                   },

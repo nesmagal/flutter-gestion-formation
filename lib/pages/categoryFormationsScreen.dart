@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../models/categoryModel.dart';
 import '../data/formationsData.dart';
+import 'formationDetailsScreen.dart';
 
 class CategoryFormationsScreen extends StatelessWidget {
   final CategoryModel category;
@@ -88,8 +89,15 @@ class CategoryFormationsScreen extends StatelessWidget {
   Widget _buildFormationCardFull(BuildContext context, formation) {
     return InkWell(
       onTap: () {
-        print("Formation cliquée: ${formation.titre}");
-        // Navigation vers les détails
+        // Navigation vers les détails de la formation
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FormationDetailsScreen(
+              formation: formation,
+            ),
+          ),
+        );
       },
       borderRadius: BorderRadius.circular(15),
       child: Container(
