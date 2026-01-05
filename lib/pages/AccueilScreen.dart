@@ -25,6 +25,13 @@ class AccueilScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: Text(
+          "Acceuil",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Color(0xFF1565C0),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(

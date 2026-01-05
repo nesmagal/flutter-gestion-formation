@@ -67,19 +67,7 @@ class _AllFormationsScreenState extends State<AllFormationsScreen> {
                   ),
                 ),
                 SizedBox(height: 15),
-                
-                // Filtre par catégorie
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterChip("Toutes"),
-                      ...CategoriesData.getAllCategories().map((cat) {
-                        return _buildFilterChip(cat.title);
-                      }).toList(),
-                    ],
-                  ),
-                ),
+
               ],
             ),
           ),

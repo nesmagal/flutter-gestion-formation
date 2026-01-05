@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/formationModel.dart';
 import '../models/inscriptionModel.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 
 class InscriptionFormScreen extends StatefulWidget {
   final FormationModel formation;
@@ -80,11 +80,11 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
         dateInscription: DateTime.now(),
       );
 
-
-       await FirebaseFirestore.instance
-          .collection('inscriptions')
-          .doc(inscription.id)
-          .set(inscription.toMap());
+//firesotre
+      // await FirebaseFirestore.instance
+      //     .collection('inscriptions')
+      //     .doc(inscription.id)
+      //     .set(inscription.toMap());
 
       // Simulation de sauvegarde
       await Future.delayed(Duration(seconds: 2));
