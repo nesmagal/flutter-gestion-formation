@@ -8,6 +8,8 @@ import '../data/formationsData.dart';
 import '../data/categoriesData.dart';
 import 'categoryFormationsScreen.dart';
 import 'formationDetailsScreen.dart';
+import 'allCategoriesScreen.dart';
+import 'allFormationsScreen.dart';
 
 class AccueilScreen extends StatelessWidget {
   @override
@@ -15,8 +17,8 @@ class AccueilScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     final userName = user?.displayName ?? "Utilisateur";
 
-    // Récupérer toutes les catégories
-    final categories = CategoriesData.getAllCategories();
+    // Récupérer les 4 premières catégories pour l'accueil
+    final categories = CategoriesData.getAllCategories().take(4).toList();
 
     // Récupérer les formations populaires
     final formations = FormationsData.getPopularFormations(limit: 5);
@@ -116,11 +118,22 @@ class AccueilScreen extends StatelessWidget {
                         color: Colors.black87,
                       ),
                     ),
-                    Text(
-                      "${FormationsData.formations.length} formations",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                    TextButton(
+                      onPressed: () {
+                        // Navigation vers toutes les catégories
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AllCategoriesScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Voir tout",
+                        style: TextStyle(
+                          color: Color(0xFF2196F3),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -128,7 +141,7 @@ class AccueilScreen extends StatelessWidget {
               ),
               SizedBox(height: 15),
 
-              // Grille de catégories (scrollable si plus de 4)
+              // Grille de catégories (4 premières)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.builder(
@@ -182,7 +195,13 @@ class AccueilScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        print("Voir toutes les formations");
+                        // Navigation vers toutes les formations
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AllFormationsScreen(),
+                          ),
+                        );
                       },
                       child: Text(
                         "Voir tout",

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../models/formationModel.dart';
+import 'inscriptionFormScreen.dart';
 
 class FormationDetailsScreen extends StatelessWidget {
   final FormationModel formation;
@@ -322,10 +323,13 @@ class FormationDetailsScreen extends StatelessWidget {
                 onPressed: formation.isComplete
                     ? null
                     : () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Inscription à ${formation.titre}"),
-                            backgroundColor: Colors.green,
+                        // Navigation vers le formulaire d'inscription
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => InscriptionFormScreen(
+                              formation: formation,
+                            ),
                           ),
                         );
                       },
