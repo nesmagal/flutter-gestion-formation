@@ -35,6 +35,7 @@ class FormationItem extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Image avec badges
             Stack(
@@ -77,11 +78,12 @@ class FormationItem extends StatelessWidget {
               ],
             ),
 
-            // Contenu de la carte
+            // Contenu de la carte avec padding réduit
             Padding(
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Titre
                   Text(
@@ -89,11 +91,12 @@ class FormationItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      height: 1.2,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 5),
+                  SizedBox(height: 4),
 
                   // Description
                   Text(
@@ -101,27 +104,40 @@ class FormationItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
+                      height: 1.2,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 6),
 
                   // Rating et étudiants
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.star, size: 16, color: Colors.amber),
                       SizedBox(width: 4),
                       Text(
                         formation.rating.toString(),
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          height: 1,
+                        ),
                       ),
                       SizedBox(width: 10),
                       Icon(Icons.people, size: 16, color: Colors.grey),
                       SizedBox(width: 4),
-                      Text(
-                        formation.students.toString(),
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      Flexible(
+                        child: Text(
+                          formation.students.toString(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            height: 1,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -147,6 +163,22 @@ class FormationItem extends StatelessWidget {
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return _buildPlaceholder();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            height: 110,
+            color: Colors.grey[200],
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          );
         },
       );
     } else {

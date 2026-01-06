@@ -11,37 +11,14 @@ class FavoritesService {
   static void addFavorite(FormationModel formation) {
     if (!isFavorite(formation.titre)) {
       _favorites.add(formation);
-      
-      // TODO: Sauvegarder dans Firebase
-      // final user = FirebaseAuth.instance.currentUser;
-      // if (user != null) {
-      //   await FirebaseFirestore.instance
-      //       .collection('users')
-      //       .doc(user.uid)
-      //       .collection('favorites')
-      //       .doc(formation.titre)
-      //       .set(formation.toMap());
-      // }
-      
-      print("✅ Formation ajoutée aux favoris: ${formation.titre}");
+
+      print("ormation ajoutée aux favoris: ${formation.titre}");
     }
   }
 
   // Retirer une formation des favoris
   static void removeFavorite(String formationTitre) {
     _favorites.removeWhere((f) => f.titre == formationTitre);
-    
-    // TODO: Supprimer de Firebase
-    // final user = FirebaseAuth.instance.currentUser;
-    // if (user != null) {
-    //   await FirebaseFirestore.instance
-    //       .collection('users')
-    //       .doc(user.uid)
-    //       .collection('favorites')
-    //       .doc(formationTitre)
-    //       .delete();
-    // }
-    
     print("Formation retirée des favoris: $formationTitre");
   }
 
@@ -71,21 +48,6 @@ class FavoritesService {
 
   // Charger les favoris depuis Firebase (à implémenter)
   static Future<void> loadFavorites() async {
-    // TODO: Charger depuis Firebase
-    // final user = FirebaseAuth.instance.currentUser;
-    // if (user != null) {
-    //   final snapshot = await FirebaseFirestore.instance
-    //       .collection('users')
-    //       .doc(user.uid)
-    //       .collection('favorites')
-    //       .get();
-    //   
-    //   _favorites.clear();
-    //   for (var doc in snapshot.docs) {
-    //     _favorites.add(FormationModel.fromMap(doc.data()));
-    //   }
-    // }
-    
     print("Favoris chargés: ${_favorites.length} formations");
   }
 

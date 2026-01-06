@@ -12,45 +12,26 @@ class MesFormationsScreen extends StatefulWidget {
   _MesFormationsScreenState createState() => _MesFormationsScreenState();
 }
 
-class _MesFormationsScreenState extends State<MesFormationsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
+class _MesFormationsScreenState extends State<MesFormationsScreen> {
+  // Le TabController a été supprimé car on n'utilise plus d'onglets
 
   @override
   Widget build(BuildContext context) {
     final inscriptions = InscriptionsService.getUserInscriptions();
-    
-    // FIX: Utiliser parenthèses () au lieu d'accolades {}
-    final enCours = inscriptions.where((i) {
-      final progress = ProgressService.getProgress(i.formationTitre);
-      return progress != null && !progress.isCompleted;
-    }).toList();
-    
-    final terminees = inscriptions.where((i) {
-      final progress = ProgressService.getProgress(i.formationTitre);
-      return progress != null && progress.isCompleted;
-    }).toList();
-    
-    final enAttente = inscriptions.where((i) => i.statut == "En attente").toList();
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: Text(
+          "Mes Formations",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Color(0xFF1565C0),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // Header
+            // Header (Simplifié sans TabBar)
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -67,7 +48,7 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
                   bottomRight: Radius.circular(30),
                 ),
               ),
-              padding: EdgeInsets.all(24),
+              padding: EdgeInsets.symmetric(vertical: 40, horizontal: 24),
               child: Column(
                 children: [
                   Icon(
@@ -86,37 +67,10 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "${inscriptions.length} formation${inscriptions.length > 1 ? 's' : ''}",
+                    "${inscriptions.length} formation${inscriptions.length > 1 ? 's' : ''} au total",
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-
-                  // Tabs
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      indicator: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      labelColor: Color(0xFF2196F3),
-                      unselectedLabelColor: Colors.white,
-                      labelStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                      tabs: [
-                        Tab(text: "En cours (${enCours.length})"),
-                        Tab(text: "Terminées (${terminees.length})"),
-                        Tab(text: "En attente (${enAttente.length})"),
-                      ],
                     ),
                   ),
                 ],
@@ -125,19 +79,35 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
 
             SizedBox(height: 20),
 
-            // Content avec TabBarView
+            // Liste unique de toutes les formations
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  // En cours
-                  _buildFormationsList(enCours, "en_cours"),
-                  // Terminées
-                  _buildFormationsList(terminees, "terminees"),
-                  // En attente
-                  _buildFormationsList(enAttente, "en_attente"),
-                ],
-              ),
+              child: inscriptions.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: inscriptions.length,
+                      itemBuilder: (context, index) {
+                        final inscription = inscriptions[index];
+                        final formation = FormationsData.formations.firstWhere(
+                          (f) => f.titre == inscription.formationTitre,
+                          orElse: () => FormationsData.formations[0],
+                        );
+                        final progress = ProgressService.getProgress(
+                            inscription.formationTitre);
+                        final category = CategoriesData.getCategoryByTitle(
+                            formation.categorie);
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 15),
+                          child: _buildFormationCard(
+                            inscription,
+                            formation,
+                            progress,
+                            category?.color ?? Colors.blue,
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -145,38 +115,8 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
     );
   }
 
-  Widget _buildFormationsList(List inscriptions, String type) {
-    if (inscriptions.isEmpty) {
-      return _buildEmptyState(type);
-    }
-
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      itemCount: inscriptions.length,
-      itemBuilder: (context, index) {
-        final inscription = inscriptions[index];
-        final formation = FormationsData.formations.firstWhere(
-          (f) => f.titre == inscription.formationTitre,
-          orElse: () => FormationsData.formations[0],
-        );
-        final progress = ProgressService.getProgress(inscription.formationTitre);
-        final category = CategoriesData.getCategoryByTitle(formation.categorie);
-
-        return Padding(
-          padding: EdgeInsets.only(bottom: 15),
-          child: _buildFormationCard(
-            inscription,
-            formation,
-            progress,
-            category?.color ?? Colors.blue,
-            type,
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFormationCard(inscription, formation, progress, Color color, String type) {
+  Widget _buildFormationCard(
+      inscription, formation, progress, Color color) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -203,7 +143,6 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
         ),
         child: Column(
           children: [
-            // Section supérieure avec image et infos
             Row(
               children: [
                 // Image
@@ -227,7 +166,6 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
                     },
                   ),
                 ),
-
                 // Contenu
                 Expanded(
                   child: Padding(
@@ -235,7 +173,6 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Badge catégorie
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
@@ -252,8 +189,6 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
                           ),
                         ),
                         SizedBox(height: 8),
-
-                        // Titre
                         Text(
                           formation.titre,
                           style: TextStyle(
@@ -264,103 +199,33 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 6),
-
-                        // Formateur
-                        Row(
-                          children: [
-                            Icon(Icons.person, size: 14, color: Colors.grey[600]),
-                            SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                formation.nomFormateur,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        if (type == "en_attente") ...[
-                          SizedBox(height: 8),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              "⏳ ${inscription.statut}",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.orange,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
+                        // Badge de statut (En attente ou En cours)
+                        if (inscription.statut == "En attente")
+                          Text(
+                            "⏳ En attente",
+                            style: TextStyle(color: Colors.orange, fontSize: 12),
+                          )
+                        else if (progress != null && progress.isCompleted)
+                          Text(
+                            "✅ Terminé",
+                            style: TextStyle(color: Colors.green, fontSize: 12),
+                          )
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-
-            // Barre de progression (si applicable)
-            if (progress != null && type != "en_attente") ...[
+            // Barre de progression (uniquement si validé et pas terminé)
+            if (progress != null) ...[
               Divider(height: 1),
               Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          progress.isCompleted
-                              ? "✅ Formation terminée !"
-                              : "Progression: ${(progress.progressPercentage * 100).toStringAsFixed(0)}%",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: progress.isCompleted ? Colors.green : color,
-                          ),
-                        ),
-                        if (!progress.isCompleted)
-                          Text(
-                            "${progress.completedLessons}/${progress.totalLessons} leçons",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: progress.progressPercentage,
-                        backgroundColor: Colors.grey[200],
-                        color: progress.isCompleted ? Colors.green : color,
-                        minHeight: 8,
-                      ),
-                    ),
-                    if (!progress.isCompleted) ...[
-                      SizedBox(height: 8),
-                      Text(
-                        "Leçon actuelle: ${progress.currentLesson}",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ],
+                padding: EdgeInsets.all(12),
+                child: LinearProgressIndicator(
+                  value: progress.progressPercentage,
+                  backgroundColor: Colors.grey[200],
+                  color: progress.isCompleted ? Colors.green : color,
+                  minHeight: 6,
                 ),
               ),
             ],
@@ -370,53 +235,16 @@ class _MesFormationsScreenState extends State<MesFormationsScreen>
     );
   }
 
-  Widget _buildEmptyState(String type) {
-    String message;
-    IconData icon;
-    
-    switch (type) {
-      case "en_cours":
-        message = "Aucune formation en cours";
-        icon = Icons.play_circle_outline;
-        break;
-      case "terminees":
-        message = "Aucune formation terminée";
-        icon = Icons.check_circle_outline;
-        break;
-      case "en_attente":
-        message = "Aucune inscription en attente";
-        icon = Icons.hourglass_empty;
-        break;
-      default:
-        message = "Aucune formation";
-        icon = Icons.school_outlined;
-    }
-
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 80,
-            color: Colors.grey[300],
-          ),
+          Icon(Icons.school_outlined, size: 80, color: Colors.grey[300]),
           SizedBox(height: 20),
           Text(
-            message,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            "Explorez les formations disponibles",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            "Aucune formation trouvée",
+            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
           ),
         ],
       ),

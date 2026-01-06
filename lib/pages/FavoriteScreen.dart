@@ -18,6 +18,13 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: Text(
+          "Favoris",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Color(0xFF1565C0),
+      ),
       body: SafeArea(
         child: Column(
           children: [

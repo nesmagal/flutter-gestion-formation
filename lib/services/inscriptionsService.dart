@@ -51,7 +51,7 @@ class InscriptionsService {
   // Annuler une inscription
   static void cancelInscription(String inscriptionId) {
     _inscriptions.removeWhere((i) => i.id == inscriptionId);
-    print("❌ Inscription annulée: $inscriptionId");
+    print("Inscription annulée: $inscriptionId");
   }
 
   // Obtenir le nombre d'inscriptions
@@ -64,22 +64,7 @@ class InscriptionsService {
 
   // Charger les inscriptions depuis Firebase (à implémenter)
   static Future<void> loadInscriptions() async {
-    // TODO: Charger depuis Firebase
-    // final user = FirebaseAuth.instance.currentUser;
-    // if (user != null) {
-    //   final snapshot = await FirebaseFirestore.instance
-    //       .collection('users')
-    //       .doc(user.uid)
-    //       .collection('inscriptions')
-    //       .get();
-    //   
-    //   _inscriptions.clear();
-    //   for (var doc in snapshot.docs) {
-    //     _inscriptions.add(InscriptionModel.fromMap(doc.data()));
-    //   }
-    // }
-    
-    print("📥 Inscriptions chargées: ${_inscriptions.length}");
+    print(" Inscriptions chargées: ${_inscriptions.length}");
   }
 
   // Obtenir les inscriptions par statut
