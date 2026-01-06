@@ -1,5 +1,12 @@
+// lib/screens/profile_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'edit_profile_screen.dart';
+import 'notifications_screen.dart';
+import 'security_screen.dart';
+import 'help_support_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -13,9 +20,10 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           "Mon Profil",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Color(0xFF1565C0),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -60,29 +68,59 @@ class ProfileScreen extends StatelessWidget {
 
             // Options du profil
             _buildProfileOption(
+              context,
               Icons.edit,
               "Modifier le profil",
-              () {},
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                );
+              },
             ),
             _buildProfileOption(
+              context,
               Icons.notifications,
               "Notifications",
-              () {},
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationsScreen()),
+                );
+              },
             ),
             _buildProfileOption(
+              context,
               Icons.security,
               "Sécurité",
-              () {},
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SecurityScreen()),
+                );
+              },
             ),
             _buildProfileOption(
+              context,
               Icons.help,
               "Aide & Support",
-              () {},
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HelpSupportScreen()),
+                );
+              },
             ),
             _buildProfileOption(
+              context,
               Icons.settings,
               "Paramètres",
-              () {},
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SettingsScreen()),
+                );
+              },
             ),
             SizedBox(height: 20),
 
@@ -118,7 +156,12 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileOption(IconData icon, String title, VoidCallback onTap) {
+  Widget _buildProfileOption(
+    BuildContext context,
+    IconData icon,
+    String title,
+    VoidCallback onTap,
+  ) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-// Constantes de l'API (à placer AVANT la classe ChatbotScreen)
-const String apiKey = 'AIzaSyDp2p3MyVwPoZKUQwCfk6ECR5p2dZpK-04';
-const String model = 'gemini-3-flash-preview';
-const String apiUrl = 
-    'https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey&quot';
+const String apiKey='AIzaSyDp2p3MyVwPoZKUQwCfk6ECR5p2dZpK-04';
+const String model='gemini-1.5-flash';
+const String apiUrl='https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey';
 
 class ChatbotScreen extends StatefulWidget {
   @override
@@ -21,6 +19,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   // Fonction pour obtenir la réponse du chatbot via l'API Gemini
   Future<String> getChatbotResponse(String query) async {
     try {
+      print('Envoi de la requête à: $apiUrl'); // Debug
+      print('Message: $query'); // Debug
+      
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
@@ -34,6 +35,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           ]
         }),
       );
+
+      print('Status code: ${response.statusCode}'); // Debug
+      print('Response body: ${response.body}'); // Debug
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -53,9 +57,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           return "Désolé, je n'ai pas pu générer une réponse.";
         }
       } else {
-        return "Erreur: ${response.statusCode}";
+        // Affiche le détail de l'erreur
+        final errorData = jsonDecode(response.body);
+        return "Erreur ${response.statusCode}: ${errorData['error']['message'] ?? 'Inconnue'}";
       }
     } catch (e) {
+      print('Exception: $e'); // Debug
       return "Erreur de connexion: $e";
     }
   }
@@ -93,9 +100,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       appBar: AppBar(
         title: Text(
           "Assistant Chatbot",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Color(0xFF1565C0),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -118,9 +126,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   )
                 : ListView.builder(
                     padding: EdgeInsets.all(16),
+                    reverse: true, // Messages récents en bas
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
-                      final message = _messages[index];
+                      // Inverser l'ordre pour afficher du plus récent au plus ancien
+                      final message = _messages[_messages.length - 1 - index];
                       return _buildMessageBubble(
                         message['text'],
                         message['isUser'],
@@ -136,7 +146,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               child: Row(
                 children: [
                   SizedBox(width: 16),
-                  CircularProgressIndicator(strokeWidth: 2),
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1565C0)),
+                    ),
+                  ),
                   SizedBox(width: 12),
                   Text(
                     "Le bot écrit...",
@@ -162,36 +179,39 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ),
               ],
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: "Tapez votre message...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide.none,
+            child: SafeArea(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      decoration: InputDecoration(
+                        hintText: "Tapez votre message...",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[200],
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20, 
+                          vertical: 10
+                        ),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 20, 
-                        vertical: 10
-                      ),
+                      onSubmitted: (_) => _sendMessage(),
+                      textInputAction: TextInputAction.send,
                     ),
-                    onSubmitted: (_) => _sendMessage(),
                   ),
-                ),
-                SizedBox(width: 10),
-                CircleAvatar(
-                  backgroundColor: Color(0xFF1565C0),
-                  child: IconButton(
-                    icon: Icon(Icons.send, color: Colors.white),
-                    onPressed: _sendMessage,
+                  SizedBox(width: 10),
+                  CircleAvatar(
+                    backgroundColor: Color(0xFF1565C0),
+                    child: IconButton(
+                      icon: Icon(Icons.send, color: Colors.white, size: 20),
+                      onPressed: _sendMessage,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

@@ -4,7 +4,7 @@ import 'package:gestion_formations_flutter/pages/AccueilScreen.dart';
 import 'package:gestion_formations_flutter/pages/ChatbotScreen.dart';
 import 'package:gestion_formations_flutter/pages/FavoriteScreen.dart';
 import 'package:gestion_formations_flutter/pages/MesFormationsScreen.dart';
-import 'package:gestion_formations_flutter/pages/ProfileScreen.dart';
+import 'package:gestion_formations_flutter/pages/profile/ProfileScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
