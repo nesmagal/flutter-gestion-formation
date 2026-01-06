@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:gestion_formations_flutter/Items/categoryItem.dart';
-import '../data/categoriesData.dart';
-import '../data/formationsData.dart';
+import '../../data/categoriesData.dart';
+import '../../data/formationsData.dart';
 import 'categoryFormationsScreen.dart';
 
 class AllCategoriesScreen extends StatelessWidget {

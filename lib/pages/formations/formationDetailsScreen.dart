@@ -1,8 +1,9 @@
 // lib/screens/formationDetailsScreen.dart
 
 import 'package:flutter/material.dart';
-import '../models/formationModel.dart';
-import 'inscriptionFormScreen.dart';
+import 'package:gestion_formations_flutter/Items/favorisItem.dart';
+import 'package:gestion_formations_flutter/models/formationModel.dart';
+import 'package:gestion_formations_flutter/pages/inscriptions/inscriptionFormScreen.dart';
 
 class FormationDetailsScreen extends StatelessWidget {
   final FormationModel formation;
@@ -23,6 +24,15 @@ class FormationDetailsScreen extends StatelessWidget {
             expandedHeight: 250,
             pinned: true,
             backgroundColor: Color(0xFF2196F3),
+            actions: [
+              // Bouton favori dans l'AppBar
+              FavoriteButton(
+                formation: formation,
+                size: 26,
+                showBackground: true,
+              ),
+              SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
@@ -323,7 +333,6 @@ class FormationDetailsScreen extends StatelessWidget {
                 onPressed: formation.isComplete
                     ? null
                     : () {
-                        // Navigation vers le formulaire d'inscription
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -359,7 +368,6 @@ class FormationDetailsScreen extends StatelessWidget {
     );
   }
 
-  // Widget pour afficher une ligne d'information
   Widget _buildInfoRow(IconData icon, String label, String value, {Color? color}) {
     return Row(
       children: [

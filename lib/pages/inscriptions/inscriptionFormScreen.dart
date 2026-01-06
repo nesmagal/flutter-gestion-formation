@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/formationModel.dart';
-import '../models/inscriptionModel.dart';
-//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gestion_formations_flutter/models/formationModel.dart';
+import 'package:gestion_formations_flutter/models/inscriptionModel.dart';
+import 'package:gestion_formations_flutter/services/inscriptionsService.dart';
+import 'package:gestion_formations_flutter/services/progressService.dart';
 
 class InscriptionFormScreen extends StatefulWidget {
   final FormationModel formation;
@@ -32,7 +33,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
   @override
   void initState() {
     super.initState();
-    // Pré-remplir l'email avec celui de Firebase
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && user.email != null) {
       _emailController.text = user.email!;
@@ -69,7 +69,7 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
       final inscription = InscriptionModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: user.uid,
-        formationId: widget.formation.titre, // À remplacer par un vrai ID
+        formationId: widget.formation.titre,
         formationTitre: widget.formation.titre,
         nom: _nomController.text.trim(),
         prenom: _prenomController.text.trim(),
@@ -80,11 +80,11 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
         dateInscription: DateTime.now(),
       );
 
-//firesotre
-      // await FirebaseFirestore.instance
-      //     .collection('inscriptions')
-      //     .doc(inscription.id)
-      //     .set(inscription.toMap());
+      // Enregistrer l'inscription
+      InscriptionsService.addInscription(inscription);
+
+      // Initialiser la progression pour cette formation
+      ProgressService.initializeProgress(widget.formation.titre, 20);
 
       // Simulation de sauvegarde
       await Future.delayed(Duration(seconds: 2));
@@ -92,7 +92,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
       print("=== INSCRIPTION ENREGISTRÉE ===");
       print(inscription.toMap());
 
-      // Afficher message de succès
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -102,7 +101,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
           ),
         );
 
-        // Retourner à la page précédente
         await Future.delayed(Duration(seconds: 1));
         Navigator.of(context).pop();
         Navigator.of(context).pop();
@@ -138,7 +136,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header formation
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -158,11 +155,7 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
               padding: EdgeInsets.all(24),
               child: Column(
                 children: [
-                  Icon(
-                    Icons.school,
-                    size: 50,
-                    color: Colors.white,
-                  ),
+                  Icon(Icons.school, size: 50, color: Colors.white),
                   SizedBox(height: 10),
                   Text(
                     widget.formation.titre,
@@ -188,7 +181,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
 
             SizedBox(height: 24),
 
-            // Formulaire
             Padding(
               padding: EdgeInsets.all(20),
               child: Form(
@@ -206,7 +198,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                     ),
                     SizedBox(height: 20),
 
-                    // Nom
                     _buildTextField(
                       controller: _nomController,
                       label: "Nom",
@@ -220,7 +211,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                     ),
                     SizedBox(height: 16),
 
-                    // Prénom
                     _buildTextField(
                       controller: _prenomController,
                       label: "Prénom",
@@ -234,7 +224,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                     ),
                     SizedBox(height: 16),
 
-                    // Email
                     _buildTextField(
                       controller: _emailController,
                       label: "Email",
@@ -252,7 +241,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                     ),
                     SizedBox(height: 16),
 
-                    // Téléphone
                     _buildTextField(
                       controller: _telephoneController,
                       label: "Téléphone",
@@ -267,7 +255,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                     ),
                     SizedBox(height: 16),
 
-                    // Niveau d'étude
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -282,13 +269,8 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                           prefixIcon: Icon(Icons.school, color: Color(0xFF2196F3)),
                           border: InputBorder.none,
                         ),
-                        items: [
-                          "Bac",
-                          "Bac +2",
-                          "Bac +3",
-                          "Bac +5",
-                          "Autre"
-                        ].map((String value) {
+                        items: ["Bac", "Bac +2", "Bac +3", "Bac +5", "Autre"]
+                            .map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
@@ -303,7 +285,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
                     ),
                     SizedBox(height: 16),
 
-                    // Motivation
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -337,7 +318,6 @@ class _InscriptionFormScreenState extends State<InscriptionFormScreen> {
 
                     SizedBox(height: 32),
 
-                    // Bouton soumettre
                     SizedBox(
                       width: double.infinity,
                       height: 54,

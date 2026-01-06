@@ -6,10 +6,10 @@ import 'package:gestion_formations_flutter/Items/categoryItem.dart';
 import 'package:gestion_formations_flutter/Items/formationItem.dart';
 import '../data/formationsData.dart';
 import '../data/categoriesData.dart';
-import 'categoryFormationsScreen.dart';
-import 'formationDetailsScreen.dart';
-import 'allCategoriesScreen.dart';
-import 'allFormationsScreen.dart';
+import 'categories/categoryFormationsScreen.dart';
+import 'formations/formationDetailsScreen.dart';
+import 'categories/allCategoriesScreen.dart';
+import 'formations/allFormationsScreen.dart';
 
 class AccueilScreen extends StatelessWidget {
   @override

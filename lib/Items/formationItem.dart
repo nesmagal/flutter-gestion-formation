@@ -1,6 +1,7 @@
 // lib/widgets/formationItem.dart
 
 import 'package:flutter/material.dart';
+import 'package:gestion_formations_flutter/Items/favorisItem.dart' show FavoriteButton;
 import '../models/formationModel.dart';
 
 class FormationItem extends StatelessWidget {
@@ -19,7 +20,7 @@ class FormationItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(15),
       child: Container(
-        width: 180,
+        width: 200,
         margin: EdgeInsets.only(right: 15),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -35,17 +36,18 @@ class FormationItem extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image avec badge si formation complète
+            // Image avec badges
             Stack(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                   child: _buildImage(),
                 ),
+                // Badge COMPLET
                 if (formation.isComplete)
                   Positioned(
                     top: 8,
-                    right: 8,
+                    left: 8,
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
@@ -62,6 +64,16 @@ class FormationItem extends StatelessWidget {
                       ),
                     ),
                   ),
+                // Bouton favori
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: FavoriteButton(
+                    formation: formation,
+                    size: 20,
+                    showBackground: true,
+                  ),
+                ),
               ],
             ),
 
@@ -78,7 +90,7 @@ class FormationItem extends StatelessWidget {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 5),
@@ -122,17 +134,15 @@ class FormationItem extends StatelessWidget {
     );
   }
 
-  // Méthode pour construire l'image
+  // Méthode pour construire l'image (assets ou network)
   Widget _buildImage() {
-    // Vérifier si c'est une URL ou un chemin local
-    final isNetworkImage = formation.imageUrl.startsWith('http://') || 
-                           formation.imageUrl.startsWith('https://');
+    final isNetwork = formation.imageUrl.startsWith('http://') || 
+                      formation.imageUrl.startsWith('https://');
 
-    if (isNetworkImage) {
-      // Image depuis Internet
+    if (isNetwork) {
       return Image.network(
         formation.imageUrl,
-        height: 100,
+        height: 110,
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
@@ -140,24 +150,21 @@ class FormationItem extends StatelessWidget {
         },
       );
     } else {
-      // Image locale (assets) - IMPORTANT: Utiliser Image.asset
       return Image.asset(
         formation.imageUrl,
-        height: 100,
+        height: 110,
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          print("Erreur de chargement de l'image: ${formation.imageUrl}");
           return _buildPlaceholder();
         },
       );
     }
   }
 
-  // Placeholder en cas d'erreur
   Widget _buildPlaceholder() {
     return Container(
-      height: 100,
+      height: 110,
       color: Colors.grey[300],
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

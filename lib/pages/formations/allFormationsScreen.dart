@@ -1,61 +1,73 @@
-// lib/screens/categoryFormationsScreen.dart
+// lib/screens/allFormationsScreen.dart
 
 import 'package:flutter/material.dart';
-import '../models/categoryModel.dart';
-import '../data/formationsData.dart';
+import '../../data/formationsData.dart';
+import '../../data/categoriesData.dart';
 import 'formationDetailsScreen.dart';
 
-class CategoryFormationsScreen extends StatelessWidget {
-  final CategoryModel category;
+class AllFormationsScreen extends StatefulWidget {
+  @override
+  _AllFormationsScreenState createState() => _AllFormationsScreenState();
+}
 
-  const CategoryFormationsScreen({
-    Key? key,
-    required this.category,
-  }) : super(key: key);
-
+class _AllFormationsScreenState extends State<AllFormationsScreen> {
+  String selectedFilter = "Toutes";
+  
   @override
   Widget build(BuildContext context) {
-    // Récupérer les formations de cette catégorie
-    final formations = FormationsData.getFormationsByCategorie(category.title);
+    // Filtrer les formations selon la sélection
+    final formations = selectedFilter == "Toutes"
+        ? FormationsData.formations
+        : FormationsData.getFormationsByCategorie(selectedFilter);
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: Text(
-          category.title,
+          "Toutes les formations",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: category.color,
+        backgroundColor: Color(0xFF2196F3),
         elevation: 0,
       ),
       body: Column(
         children: [
-          // Header avec informations de la catégorie
+          // Header avec statistiques
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: category.color,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1976D2),
+                  Color(0xFF2196F3),
+                ],
+              ),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
               ),
             ),
-            padding: EdgeInsets.all(24),
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
             child: Column(
               children: [
                 Icon(
-                  category.icon,
+                  Icons.school,
                   size: 60,
                   color: Colors.white,
                 ),
                 SizedBox(height: 10),
                 Text(
-                  "${formations.length} formation${formations.length > 1 ? 's' : ''} disponible${formations.length > 1 ? 's' : ''}",
+                  "${FormationsData.formations.length} formations disponibles",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+                SizedBox(height: 15),
+
               ],
             ),
           ),
@@ -70,11 +82,17 @@ class CategoryFormationsScreen extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     itemCount: formations.length,
                     itemBuilder: (context, index) {
+                      final formation = formations[index];
+                      final category = CategoriesData.getCategoryByTitle(
+                        formation.categorie,
+                      );
+
                       return Padding(
                         padding: EdgeInsets.only(bottom: 15),
-                        child: _buildFormationCardFull(
+                        child: _buildFormationCard(
                           context,
-                          formations[index],
+                          formation,
+                          category?.color ?? Colors.blue,
                         ),
                       );
                     },
@@ -84,12 +102,38 @@ class CategoryFormationsScreen extends StatelessWidget {
       ),
     );
   }
+  
+  Widget _buildFilterChip(String label) {
+    final isSelected = selectedFilter == label;
+    
+    return Padding(
+      padding: EdgeInsets.only(right: 10),
+      child: FilterChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white70,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            fontSize: 13,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (selected) {
+          setState(() {
+            selectedFilter = label;
+          });
+        },
+        backgroundColor: Colors.white.withOpacity(0.2),
+        selectedColor: Colors.white.withOpacity(0.3),
+        checkmarkColor: Colors.white,
+        side: BorderSide(color: Colors.white.withOpacity(0.3)),
+      ),
+    );
+  }
 
-  // Widget pour afficher une formation en mode liste complète
-  Widget _buildFormationCardFull(BuildContext context, formation) {
+  Widget _buildFormationCard(context, formation, Color categoryColor) {
     return InkWell(
       onTap: () {
-        // Navigation vers les détails de la formation
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -122,13 +166,13 @@ class CategoryFormationsScreen extends StatelessWidget {
               ),
               child: Image.asset(
                 formation.imageUrl,
-                width: 120,
-                height: 120,
+                width: 110,
+                height: 130,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    width: 120,
-                    height: 120,
+                    width: 110,
+                    height: 130,
                     color: Colors.grey[300],
                     child: Icon(Icons.image, color: Colors.grey),
                   );
@@ -143,11 +187,29 @@ class CategoryFormationsScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Badge catégorie
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: categoryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        formation.categorie,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: categoryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+
                     // Titre
                     Text(
                       formation.titre,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 2,
@@ -158,13 +220,13 @@ class CategoryFormationsScreen extends StatelessWidget {
                     // Formateur
                     Row(
                       children: [
-                        Icon(Icons.person, size: 14, color: Colors.grey[600]),
+                        Icon(Icons.person, size: 12, color: Colors.grey[600]),
                         SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             formation.nomFormateur,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               color: Colors.grey[600],
                             ),
                             maxLines: 1,
@@ -179,19 +241,9 @@ class CategoryFormationsScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Prix
-                        Text(
-                          "${formation.prix.toStringAsFixed(0)} TND",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: category.color,
-                          ),
-                        ),
-                        // Rating
                         Row(
                           children: [
-                            Icon(Icons.star, size: 16, color: Colors.amber),
+                            Icon(Icons.star, size: 14, color: Colors.amber),
                             SizedBox(width: 4),
                             Text(
                               formation.rating.toString(),
@@ -202,32 +254,16 @@ class CategoryFormationsScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                        Text(
+                          "${formation.prix.toStringAsFixed(0)} TND",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: categoryColor,
+                          ),
+                        ),
                       ],
                     ),
-
-                    // Places restantes
-                    if (!formation.isComplete) ...[
-                      SizedBox(height: 5),
-                      Text(
-                        "${formation.placesRestantes} places restantes",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.green,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                    if (formation.isComplete) ...[
-                      SizedBox(height: 5),
-                      Text(
-                        "COMPLET",
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -238,32 +274,23 @@ class CategoryFormationsScreen extends StatelessWidget {
     );
   }
 
-  // Widget pour état vide
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.school_outlined,
+            Icons.search_off,
             size: 80,
             color: Colors.grey[400],
           ),
           SizedBox(height: 20),
           Text(
-            "Aucune formation disponible",
+            "Aucune formation trouvée",
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            "Revenez plus tard !",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
             ),
           ),
         ],
